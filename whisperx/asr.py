@@ -246,7 +246,7 @@ def detect_language(self, audio: np.ndarray):
     # Check if the audio is blank or very quiet
     if np.max(np.abs(audio)) < 0.01:  # Adjust this threshold as needed
         print("Warning: Audio appears to be blank or very quiet. Unable to detect language.")
-        return None
+        #return None
 
     if audio.shape[0] < N_SAMPLES:
         print("Warning: audio is shorter than 30s, language detection may be inaccurate.")
@@ -262,7 +262,7 @@ def detect_language(self, audio: np.ndarray):
 
     if start_index + segment_length > len(audio):
         print("Warning: No non-silent segment found in the audio. Unable to detect language.")
-        return None
+        #return None
 
     model_n_mels = self.model.feat_kwargs.get("feature_size")
     segment = log_mel_spectrogram(audio[start_index:start_index + segment_length],
