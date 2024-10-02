@@ -242,40 +242,40 @@ class FasterWhisperPipeline(Pipeline):
         return {"segments": segments, "language": language}
 
 
-def detect_language(self, audio: np.ndarray):
-    # Check if the audio is blank or very quiet
-    if np.max(np.abs(audio)) < 0.01:  # Adjust this threshold as needed
-        print("Warning: Audio appears to be blank or very quiet. Unable to detect language.")
-        #return None
-
-    if audio.shape[0] < N_SAMPLES:
-        print("Warning: audio is shorter than 30s, language detection may be inaccurate.")
-
-    # Find the first non-silent segment
-    segment_length = N_SAMPLES
-    start_index = 0
-    while start_index + segment_length <= len(audio):
-        segment = audio[start_index:start_index + segment_length]
-        if np.max(np.abs(segment)) >= 0.01:  # Adjust this threshold as needed
-            break
-        start_index += segment_length // 2  # Overlap by half to avoid missing speech
-
-    if start_index + segment_length > len(audio):
-        print("Warning: No non-silent segment found in the audio. Unable to detect language.")
-        #return None
-
-    model_n_mels = self.model.feat_kwargs.get("feature_size")
-    segment = log_mel_spectrogram(audio[start_index:start_index + segment_length],
-                                  n_mels=model_n_mels if model_n_mels is not None else 80,
-                                  padding=0 if segment_length >= N_SAMPLES else N_SAMPLES - segment_length)
+    def detect_language(self, audio: np.ndarray):
+        # Check if the audio is blank or very quiet
+        if np.max(np.abs(audio)) < 0.01:  # Adjust this threshold as needed
+            print("Warning: Audio appears to be blank or very quiet. Unable to detect language.")
+            #return None
     
-    encoder_output = self.model.encode(segment)
-    results = self.model.model.detect_language(encoder_output)
-    language_token, language_probability = results[0][0]
-    language = language_token[2:-2]
+        if audio.shape[0] < N_SAMPLES:
+            print("Warning: audio is shorter than 30s, language detection may be inaccurate.")
     
-    print(f"Detected language: {language} ({language_probability:.2f}) in segment starting at {start_index/self.model.sample_rate:.2f}s")
-    return language
+        # Find the first non-silent segment
+        segment_length = N_SAMPLES
+        start_index = 0
+        while start_index + segment_length <= len(audio):
+            segment = audio[start_index:start_index + segment_length]
+            if np.max(np.abs(segment)) >= 0.01:  # Adjust this threshold as needed
+                break
+            start_index += segment_length // 2  # Overlap by half to avoid missing speech
+    
+        if start_index + segment_length > len(audio):
+            print("Warning: No non-silent segment found in the audio. Unable to detect language.")
+            #return None
+    
+        model_n_mels = self.model.feat_kwargs.get("feature_size")
+        segment = log_mel_spectrogram(audio[start_index:start_index + segment_length],
+                                      n_mels=model_n_mels if model_n_mels is not None else 80,
+                                      padding=0 if segment_length >= N_SAMPLES else N_SAMPLES - segment_length)
+        
+        encoder_output = self.model.encode(segment)
+        results = self.model.model.detect_language(encoder_output)
+        language_token, language_probability = results[0][0]
+        language = language_token[2:-2]
+        
+        print(f"Detected language: {language} ({language_probability:.2f}) in segment starting at {start_index/self.model.sample_rate:.2f}s")
+        return language
 
 def load_model(whisper_arch,
                device,
