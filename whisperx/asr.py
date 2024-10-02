@@ -274,7 +274,7 @@ class FasterWhisperPipeline(Pipeline):
         language_token, language_probability = results[0][0]
         language = language_token[2:-2]
         
-        print(f"Detected language: {language} ({language_probability:.2f}) in segment starting at {start_index/self.model.sample_rate:.2f}s")
+        print(f"Detected language: {language} ({language_probability:.2f}) in segment starting at {start_index/SAMPLE_RATE:.2f}s")
         return language
 
 def load_model(whisper_arch,
